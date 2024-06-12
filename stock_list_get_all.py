@@ -5,17 +5,17 @@ import requests
 import pandas as pd
 
 sbi_foreign_stock_list = [
-  {"america":   {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_usequity_list.html", "tag": "table", "c_cd":"", "class": "md-l-table-01 md-l-utl-mt10"}},
-  {"china":     {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_hk_list.html",       "tag": "div",   "c_cd":"HK", "class": "accTbl01"}},
-  {"korea":     {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_kr_list.html",       "tag": "div",   "c_cd":"KS", "class": "accTbl01"}},
-  {"russia":    {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_ru_list.html",       "tag": "div",   "c_cd":"ME", "class": "accTbl01"}},
-  {"vietnam":   {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_vn_list.html",       "tag": "div",   "c_cd":"VN", "class": "accTbl01"}},
-  {"Indonesia": {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_id_list.html",       "tag": "div",   "c_cd":"JK", "class": "accTbl01"}},
-  {"Singapore": {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_sg_list.html",       "tag": "div",   "c_cd":"SI", "class": "accTbl01"}}, # SBIとyahooのティカーが一致しない件
-  {"thailand":  {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_th_list.html",       "tag": "div",   "c_cd":"BK", "class": "accTbl01"}},
-  {"malaysia":  {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_my_list.html",       "tag": "div",   "c_cd":"KL", "class": "accTbl01"}} # SBIとyahooのティカーが一致しない件
+  {"america":   {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_usequity_list.html", "tag": "table", "c_cd":"",    "class": "foo_table md-l-table-01 md-l-utl-mt10"}},
+  {"china":     {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_hk_list.html",       "tag": "div",   "c_cd":".HK", "class": "accTbl01"}},
+  {"korea":     {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_kr_list.html",       "tag": "div",   "c_cd":".KS", "class": "accTbl01"}},
+  {"russia":    {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_ru_list.html",       "tag": "div",   "c_cd":".ME", "class": "accTbl01"}},
+  {"vietnam":   {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_vn_list.html",       "tag": "div",   "c_cd":".VN", "class": "accTbl01"}},
+  {"Indonesia": {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_id_list.html",       "tag": "div",   "c_cd":".JK", "class": "accTbl01"}},
+  # {"Singapore": {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_sg_list.html",       "tag": "div",   "c_cd":".SI", "class": "accTbl01"}}, # SBIとyahooのティカーが一致しない件
+  {"thailand":  {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_th_list.html",       "tag": "div",   "c_cd":".BK", "class": "accTbl01"}},
+  # {"malaysia":  {"url": "https://search.sbisec.co.jp/v2/popwin/info/stock/pop6040_my_list.html",       "tag": "div",   "c_cd":".KL", "class": "accTbl01"}}, # SBIとyahooのティカーが一致しない件(SBIは英略、yahooは数値)
 ]
-out_oth_fol = "/stock_list/overseas_list/"
+out_oth_fol = "./stock_list/overseas_list/"
 
 for foreign_dict in sbi_foreign_stock_list:
   for country, values in foreign_dict.items():
@@ -33,9 +33,12 @@ for foreign_dict in sbi_foreign_stock_list:
         cols = row.find_all("td")
         name = cols[0].text.strip()
         stock_data.append((ticker, name))
-      continue
+      break
 
     df_foreign_stock = pd.DataFrame(stock_data, columns=["コード", "銘柄名"])
-    df_foreign_stock["コード"] = df_foreign_stock["コード"].astype(str) + country_code
+    if country == "china":
+      df_foreign_stock["コード"] = df_foreign_stock["コード"].astype(str).str[1:] + country_code
+    else:
+      df_foreign_stock["コード"] = df_foreign_stock["コード"].astype(str) + country_code
     df_foreign_stock.to_csv(out_oth_fol + country + "_stock_list.csv")
     time.sleep(2)
