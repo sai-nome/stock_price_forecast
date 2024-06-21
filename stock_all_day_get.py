@@ -25,11 +25,11 @@ for jap_file_list in inp_file_oth_list:
   jap_list = pd.read_csv(jap_file_list).values.tolist()
   for stock in jap_list:
     # df = yf.download(str(stock[1]), start, end)
-    # 東京はT、札幌はSが後ろにつくので注意、アメリカは不要T
+    # 東京はT、札幌はSが後ろにつくので注意、アメリカは不要
     # df = web.get_data_yahoo([str(stock[1])+".T"], start, end)
     df = web.get_data_yahoo([str(stock[1])], start, end)
     print(df.info)
-    df.to_csv(out_fol+stock[2]+".csv")
+    df.to_csv(out_fol+stock[2].replace("/", " ").replace("\r\n", " ").replace("?", " ")+".csv")
     time.sleep(2)
 # 取得したデータを表示
 # df
