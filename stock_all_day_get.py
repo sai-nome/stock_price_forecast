@@ -28,8 +28,7 @@ for jap_file_list in inp_file_oth_list:
     # 東京はT、札幌はSが後ろにつくので注意、アメリカは不要
     # df = web.get_data_yahoo([str(stock[1])+".T"], start, end)
     df = web.get_data_yahoo([str(stock[1])], start, end)
+    df['symbol'] = str(stock[1])
     print(df.info)
     df.to_csv(out_fol+stock[2].replace("/", " ").replace("\r\n", " ").replace("?", " ")+".csv")
     time.sleep(2)
-# 取得したデータを表示
-# df
