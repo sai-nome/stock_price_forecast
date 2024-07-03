@@ -7,6 +7,7 @@
 .yarn/install-state.gz
 /stock_list
 /stock_data
+/datamart
 
 # testing
 /coverage
