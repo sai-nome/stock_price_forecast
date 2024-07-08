@@ -12,12 +12,12 @@ stock_list = glob.glob(out_fol + "*.csv")
 
 def moveing_average(df):
   # 単純移動平均線（SMA）の計算
-  df['SMA'] = df['Adj Close'].rolling(window=20).mean()
+  df['SMA'] = df['Close'].rolling(window=20).mean()
   # 指数平滑移動平均線（EMA）の計算
-  df['EMA'] = df['Adj Close'].ewm(span=20, adjust=False).mean()
+  df['EMA'] = df['Close'].ewm(span=20, adjust=False).mean()
   # # グラフのプロット
   # plt.figure(figsize=(14, 7))
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['SMA'], label='20-Day SMA', color='blue')
   # plt.plot(df['EMA'], label='20-Day EMA', color='red')
 
@@ -30,10 +30,10 @@ def moveing_average(df):
 
 def macd(df):
   # 短期EMA（12日）の計算
-  short_ema = df['Adj Close'].ewm(span=12, adjust=False).mean()
+  short_ema = df['Close'].ewm(span=12, adjust=False).mean()
 
   # 長期EMA（26日）の計算
-  long_ema = df['Adj Close'].ewm(span=26, adjust=False).mean()
+  long_ema = df['Close'].ewm(span=26, adjust=False).mean()
 
   # MACDラインの計算
   df['MACD'] = short_ema - long_ema
@@ -67,10 +67,10 @@ def macd(df):
 
 def bollinger_bands(df):
   # 中央バンド（20日間の単純移動平均線）の計算
-  df['Middle_Band'] = df['Adj Close'].rolling(window=20).mean()
+  df['Middle_Band'] = df['Close'].rolling(window=20).mean()
 
   # 標準偏差の計算
-  df['STD'] = df['Adj Close'].rolling(window=20).std()
+  df['STD'] = df['Close'].rolling(window=20).std()
 
   # 上部バンドの計算
   df['Upper_Band'] = df['Middle_Band'] + (2 * df['STD'])
@@ -79,18 +79,18 @@ def bollinger_bands(df):
   df['Lower_Band'] = df['Middle_Band'] - (2 * df['STD'])
 
   # 過熱感の判断
-  df['bands_buy_flg'] = df['Adj Close'] > df['Lower_Band']
-  df['bands_sell_flg'] = df['Adj Close'] < df['Upper_Band']
+  df['bands_buy_flg'] = df['Close'] > df['Lower_Band']
+  df['bands_sell_flg'] = df['Close'] < df['Upper_Band']
   # # グラフのプロット
   # plt.figure(figsize=(14, 7))
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['Middle_Band'], label='Middle Band (SMA 20)', color='blue')
   # plt.plot(df['Upper_Band'], label='Upper Band (Middle + 2*STD)', color='red')
   # plt.plot(df['Lower_Band'], label='Lower Band (Middle - 2*STD)', color='green')
 
   # plt.fill_between(df.index, df['Upper_Band'], df['Lower_Band'], color='grey', alpha=0.1)
-  # plt.scatter(df.index[df['bands_buy_flg']], df['Adj Close'][df['bands_buy_flg']], label='bands_buy_flg', color='red', marker='o')
-  # plt.scatter(df.index[df['bands_sell_flg']], df['Adj Close'][df['bands_sell_flg']], label='bands_sell_flg', color='green', marker='o')
+  # plt.scatter(df.index[df['bands_buy_flg']], df['Close'][df['bands_buy_flg']], label='bands_buy_flg', color='red', marker='o')
+  # plt.scatter(df.index[df['bands_sell_flg']], df['Close'][df['bands_sell_flg']], label='bands_sell_flg', color='green', marker='o')
 
   # plt.title('Bollinger Bands with bands_buy_flg and bands_sell_flg Signals')
   # plt.xlabel('Date')
@@ -113,15 +113,15 @@ def ichimoku_kinko_hyo(df):
   df['Senkou_Span_B'] = ((df['High'].rolling(window=52).max() + df['Low'].rolling(window=52).min()) / 2).shift(26)
 
   # 遅行スパン（現在の終値を26日遅らせてプロット）
-  df['Chikou_Span'] = df['Adj Close'].shift(-26)
+  df['Chikou_Span'] = df['Close'].shift(-26)
 
   # 雲の上・下の判定とシグナル(買いシグナル))
   df['ikh_Signal'] = np.where(df['Tenkan_sen'] > df['Kijun_sen'], 'Buy', 'Sell')
-  df['ikh_Trend'] = np.where(df['Adj Close'] > df[['Senkou_Span_A', 'Senkou_Span_B']].max(axis=1), 'Uptrend',
-                        np.where(df['Adj Close'] < df[['Senkou_Span_A', 'Senkou_Span_B']].min(axis=1), 'Downtrend', 'Neutral'))
+  df['ikh_Trend'] = np.where(df['Close'] > df[['Senkou_Span_A', 'Senkou_Span_B']].max(axis=1), 'Uptrend',
+                        np.where(df['Close'] < df[['Senkou_Span_A', 'Senkou_Span_B']].min(axis=1), 'Downtrend', 'Neutral'))
   # # グラフのプロット
   # plt.figure(figsize=(14, 7))
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['Tenkan_sen'], label='Tenkan-sen (Conversion Line)', color='blue')
   # plt.plot(df['Kijun_sen'], label='Kijun-sen (Base Line)', color='red')
   # plt.plot(df['Senkou_Span_A'], label='Senkou Span A (Leading Span 1)', color='green')
@@ -140,11 +140,11 @@ def ichimoku_kinko_hyo(df):
   # plt.show()
 
   # シグナルとトレンドの表示
-  # print(df[['Adj Close', 'Tenkan_sen', 'Kijun_sen', 'ikh_Signal', 'ikh_Trend']].tail(30))
+  # print(df[['Close', 'Tenkan_sen', 'Kijun_sen', 'ikh_Signal', 'ikh_Trend']].tail(30))
 
 def directional_movement_index(df):
   # True Range（TR）の計算
-  df['TR'] = df[['High', 'Low', 'Adj Close']].apply(lambda x: max(x['High'] - x['Low'], abs(x['High'] - x['Adj Close']), abs(x['Low'] - x['Adj Close'])), axis=1)
+  df['TR'] = df[['High', 'Low', 'Close']].apply(lambda x: max(x['High'] - x['Low'], abs(x['High'] - x['Close']), abs(x['Low'] - x['Close'])), axis=1)
 
   # +DMと-DMの計算
   df['+DM'] = df['High'].diff().apply(lambda x: x if x > 0 else 0)
@@ -195,7 +195,7 @@ def parabolic(df):
   df['AF'] = np.nan
 
   # 初期値設定
-  initial_trend = 'up' if df['Adj Close'].iloc[1] > df['Adj Close'].iloc[0] else 'down'
+  initial_trend = 'up' if df['Close'].iloc[1] > df['Close'].iloc[0] else 'down'
   initial_AF = 0.02
   max_AF = 0.2
 
@@ -209,7 +209,7 @@ def parabolic(df):
       prev_SAR = df['SAR'].iloc[i-1]
       prev_AF = df['AF'].iloc[i-1]
       prev_EP = df['EP'].iloc[i-1]
-      trend = 'up' if df['Adj Close'].iloc[i-1] > prev_SAR else 'down'
+      trend = 'up' if df['Close'].iloc[i-1] > prev_SAR else 'down'
       
       if trend == 'up':
           SAR = prev_SAR + prev_AF * (prev_EP - prev_SAR)
@@ -237,15 +237,15 @@ def parabolic(df):
       df.at[df.index[i], 'AF'] = AF
 
   # シグナルの判定
-  df['sar_Signal'] = np.where((df['Adj Close'].shift(1) < df['SAR'].shift(1)) & (df['Adj Close'] > df['SAR']), 'Sell',
-                          np.where((df['Adj Close'].shift(1) > df['SAR'].shift(1)) & (df['Adj Close'] < df['SAR']), 'Buy', np.nan))
+  df['sar_Signal'] = np.where((df['Close'].shift(1) < df['SAR'].shift(1)) & (df['Close'] > df['SAR']), 'Sell',
+                          np.where((df['Close'].shift(1) > df['SAR'].shift(1)) & (df['Close'] < df['SAR']), 'Buy', np.nan))
 
   # # グラフのプロット
   # plt.figure(figsize=(14, 7))
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['SAR'], label='Parabolic SAR', linestyle='dashed', color='blue')
-  # plt.scatter(df[df['sar_Signal'] == 'Buy'].index, df[df['sar_Signal'] == 'Buy']['Adj Close'], marker='^', color='green', label='Buy Signal', s=100)
-  # plt.scatter(df[df['sar_Signal'] == 'Sell'].index, df[df['sar_Signal'] == 'Sell']['Adj Close'], marker='v', color='red', label='Sell Signal', s=100)
+  # plt.scatter(df[df['sar_Signal'] == 'Buy'].index, df[df['sar_Signal'] == 'Buy']['Close'], marker='^', color='green', label='Buy Signal', s=100)
+  # plt.scatter(df[df['sar_Signal'] == 'Sell'].index, df[df['sar_Signal'] == 'Sell']['Close'], marker='v', color='red', label='Sell Signal', s=100)
 
   # plt.title('Parabolic SAR with Buy and Sell Signals')
   # plt.xlabel('Date')
@@ -255,7 +255,7 @@ def parabolic(df):
   # plt.show()
 
   # 結果の表示
-  # print(df[['Adj Close', 'SAR', 'EP', 'AF', 'sar_Signal']].tail(30))
+  # print(df[['Close', 'SAR', 'EP', 'AF', 'sar_Signal']].tail(30))
 
 def envelope(df):
   # エンベロープの計算
@@ -263,16 +263,16 @@ def envelope(df):
   df['Upper Envelope'] = df['SMA'] * (1 + percentage)
   df['Lower Envelope'] = df['SMA'] * (1 - percentage)
   # シグナルの判定
-  df['env_Signal'] = np.where(df['Adj Close'] > df['Upper Envelope'], 'Sell',
-                          np.where(df['Adj Close'] < df['Lower Envelope'], 'Buy', np.nan))
+  df['env_Signal'] = np.where(df['Close'] > df['Upper Envelope'], 'Sell',
+                          np.where(df['Close'] < df['Lower Envelope'], 'Buy', np.nan))
   # # グラフのプロット
   # plt.figure(figsize=(14, 7))
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['SMA'], label='20-Day SMA', color='blue')
   # plt.plot(df['Upper Envelope'], label='Upper Envelope (SMA + 2%)', color='green')
   # plt.plot(df['Lower Envelope'], label='Lower Envelope (SMA - 2%)', color='red')
-  # plt.scatter(df[df['env_Signal'] == 'Buy'].index, df[df['env_Signal'] == 'Buy']['Adj Close'], marker='^', color='green', label='Buy Signal', s=100)
-  # plt.scatter(df[df['env_Signal'] == 'Sell'].index, df[df['env_Signal'] == 'Sell']['Adj Close'], marker='v', color='red', label='Sell Signal', s=100)
+  # plt.scatter(df[df['env_Signal'] == 'Buy'].index, df[df['env_Signal'] == 'Buy']['Close'], marker='^', color='green', label='Buy Signal', s=100)
+  # plt.scatter(df[df['env_Signal'] == 'Sell'].index, df[df['env_Signal'] == 'Sell']['Close'], marker='v', color='red', label='Sell Signal', s=100)
 
   # plt.title('Envelopes with Buy and Sell Signals')
   # plt.xlabel('Date')
@@ -282,14 +282,14 @@ def envelope(df):
   # plt.show()
 
   # 結果の表示
-  # print(df[['Adj Close', 'SMA', 'Upper Envelope', 'Lower Envelope', 'env_Signal']].tail(30))
+  # print(df[['Close', 'SMA', 'Upper Envelope', 'Lower Envelope', 'env_Signal']].tail(30))
 
 def rsi(df):
   # RSIの計算
   window = 14
 
   # 終値の変化
-  df['Change'] = df['Adj Close'].diff()
+  df['Change'] = df['Close'].diff()
 
   # 上昇幅と下落幅の計算
   df['Gain'] = np.where(df['Change'] > 0, df['Change'], 0)
@@ -313,7 +313,7 @@ def rsi(df):
 
   # # RSIのプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price and RSI')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -347,7 +347,7 @@ def rci(df):
   # RCIの計算
   window = 14
 
-  df['RCI'] = df['Adj Close'].rolling(window=window).apply(calculate_rci, raw=False)
+  df['RCI'] = df['Close'].rolling(window=window).apply(calculate_rci, raw=False)
 
   # シグナルの判定（RSIと同様に70以上で売りシグナル、30以下で買いシグナル）
   df['rci_Signal'] = np.where(df['RCI'] > 70, 'Sell', np.where(df['RCI'] < 30, 'Buy', np.nan))
@@ -357,7 +357,7 @@ def rci(df):
 
   # # RCIのプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price and RCI')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -381,7 +381,7 @@ def rci(df):
 
 def madp(df):
   # 乖離率の計算
-  df['madp'] = (df['Adj Close'] - df['SMA']) / df['SMA'] * 100
+  df['madp'] = (df['Close'] - df['SMA']) / df['SMA'] * 100
 
   # シグナルの判定
   df['madp_Signal'] = np.nan
@@ -398,7 +398,7 @@ def madp(df):
 
   # # 終値と移動平均線のプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.plot(df['SMA'], label='20-Day SMA', color='blue')
   # plt.title('Stock Price and Moving Average')
   # plt.xlabel('Date')
@@ -427,7 +427,7 @@ def stochastic(df):
   window = 14
   df['14-High'] = df['High'].rolling(window=window).max()
   df['14-Low'] = df['Low'].rolling(window=window).min()
-  df['%K'] = (df['Adj Close'] - df['14-Low']) / (df['14-High'] - df['14-Low']) * 100
+  df['%K'] = (df['Close'] - df['14-Low']) / (df['14-High'] - df['14-Low']) * 100
 
   # スロー%Dの計算
   df['slow%D'] = df['%K'].rolling(window=3).mean()
@@ -445,7 +445,7 @@ def stochastic(df):
 
   # # 終値のプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price and Slow Stochastic')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -472,8 +472,8 @@ def stochastic(df):
 def momentum_roc(df):
   # モメンタムとROCの計算
   window = 14
-  df['Momentum'] = df['Adj Close'] - df['Adj Close'].shift(window)
-  df['ROC'] = ((df['Adj Close'] - df['Adj Close'].shift(window)) / df['Adj Close'].shift(window)) * 100
+  df['Momentum'] = df['Close'] - df['Close'].shift(window)
+  df['ROC'] = ((df['Close'] - df['Close'].shift(window)) / df['Close'].shift(window)) * 100
 
   # トレンドの判定
   df['Momentum_Trend'] = np.where(df['Momentum'] > 0, 'Uptrend', np.where(df['Momentum'] < 0, 'Downtrend', 'Neutral'))
@@ -484,7 +484,7 @@ def momentum_roc(df):
 
   # # 終値のプロット
   # plt.subplot(3, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -515,7 +515,7 @@ def momentum_roc(df):
 
 def mfi(df):
   # 典型価格（TP）の計算
-  df['TP'] = (df['High'] + df['Low'] + df['Adj Close']) / 3
+  df['TP'] = (df['High'] + df['Low'] + df['Close']) / 3
 
   # マネーフロー（Raw Money Flow）の計算
   df['Raw Money Flow'] = df['TP'] * df['Volume']
@@ -546,7 +546,7 @@ def mfi(df):
 
   # # 終値のプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price and Money Flow Index (MFI)')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -571,7 +571,7 @@ def mfi(df):
 
 def cci(df):
   # 典型価格（TP）の計算
-  df['TP'] = (df['High'] + df['Low'] + df['Adj Close']) / 3
+  df['TP'] = (df['High'] + df['Low'] + df['Close']) / 3
 
   # 単純移動平均（SMA）の計算
   window = 20
@@ -596,7 +596,7 @@ def cci(df):
 
   # # 終値のプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price and Commodity Channel Index (CCI)')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
@@ -621,7 +621,7 @@ def cci(df):
 
 def gap(df):
 # ギャップアップとギャップダウンの計算
-  df['Previous Close'] = df['Adj Close'].shift(1)
+  df['Previous Close'] = df['Close'].shift(1)
   df['Gap'] = df['Open'] - df['Previous Close']
   df['Gap Type'] = np.where(df['Gap'] > 0, 'Gap Up', np.where(df['Gap'] < 0, 'Gap Down', 'No Gap'))
 
@@ -630,7 +630,7 @@ def gap(df):
 
   # # 終値と始値のプロット
   # plt.subplot(2, 1, 1)
-  # plt.plot(df.index, df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df.index, df['Close'], label='Close Price', color='black')
   # plt.plot(df.index, df['Open'], label='Open Price', color='blue')
   # plt.title('Stock Price with Gaps')
   # plt.xlabel('Date')
@@ -658,12 +658,12 @@ def hv(df):
   window = 20
 
   # リターンの計算
-  df['Return'] = np.log(df['Adj Close'] / df['Adj Close'].shift(1))
+  df['Return'] = np.log(df['Close'] / df['Close'].shift(1))
 
   # 標準偏差の計算
   df['HV'] = df['Return'].rolling(window=window).std() * np.sqrt(252)
 
-  # df['RCI'] = df['Adj Close'].rolling(window=window).apply(calculate_rci, raw=False)
+  # df['RCI'] = df['Close'].rolling(window=window).apply(calculate_rci, raw=False)
 
   # シグナルの判定
   df['hv_Signal'] = np.nan
@@ -678,7 +678,7 @@ def hv(df):
 
   # # 終値のプロット
   # plt.subplot(3, 1, 1)
-  # plt.plot(df['Adj Close'], label='Close Price', color='black')
+  # plt.plot(df['Close'], label='Close Price', color='black')
   # plt.title('Stock Price, Historical Volatility, and RCI')
   # plt.xlabel('Date')
   # plt.ylabel('Price')
